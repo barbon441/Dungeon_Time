@@ -99,47 +99,54 @@
 
   <script>
     const currentTimeEl = document.getElementById("currentTime");
-    const nextDungeonEl = document.getElementById("nextDungeon");
+const nextDungeonEl = document.getElementById("nextDungeon");
 
-    function updateTime() {
-      const now = new Date();
+function updateTime() {
+  const now = new Date();
 
-      // เวลาประเทศไทย (UTC+7)
-      const thaiOffset = 7 * 60;
-      const utc = now.getTime() + now.getTimezoneOffset() * 60000;
-      const thailandTime = new Date(utc + thaiOffset * 60000);
+  // เวลาประเทศไทย (UTC+7)
+  const thaiOffset = 7 * 60;
+  const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+  const thailandTime = new Date(utc + thaiOffset * 60000);
 
-      const hours = thailandTime.getHours().toString().padStart(2, '0');
-      const minutes = thailandTime.getMinutes().toString().padStart(2, '0');
-      const seconds = thailandTime.getSeconds().toString().padStart(2, '0');
-      currentTimeEl.textContent = `เวลาปัจจุบัน: ${hours}:${minutes}:${seconds}`;
+  const hours = thailandTime.getHours().toString().padStart(2, '0');
+  const minutes = thailandTime.getMinutes().toString().padStart(2, '0');
+  const seconds = thailandTime.getSeconds().toString().padStart(2, '0');
+  currentTimeEl.textContent = `เวลาปัจจุบัน: ${hours}:${minutes}:${seconds}`;
 
-      // เริ่มรอบแรก 17:30
-      const firstStart = new Date(thailandTime);
-      firstStart.setHours(17, 30, 0, 0);
+  const firstStart = new Date(thailandTime);
+  firstStart.setHours(17, 30, 0, 0);
 
-      // รอบถัดไปเพิ่มทีละ 4 ชั่วโมง (interval = 4 ชม.)
-      const interval = 4 * 60 * 60 * 1000; // 4 ชม.
-      const duration = 30 * 60 * 1000; // 30 นาที
+  const interval = 4 * 60 * 60 * 1000; // 4 ชั่วโมง
+  const duration = 30 * 60 * 1000; // 30 นาที
 
-      let nextStart = new Date(firstStart);
+  let nextStart = new Date(firstStart);
 
-      while (nextStart.getTime() + duration <= thailandTime.getTime()) {
-        nextStart = new Date(nextStart.getTime() + interval);
-      }
-
-      const nextEnd = new Date(nextStart.getTime() + duration);
-
-      const nH = nextStart.getHours().toString().padStart(2, '0');
-      const nM = nextStart.getMinutes().toString().padStart(2, '0');
-      const eH = nextEnd.getHours().toString().padStart(2, '0');
-      const eM = nextEnd.getMinutes().toString().padStart(2, '0');
-
-      nextDungeonEl.textContent = `รอบถัดไป: ${nH}:${nM} - ${eH}:${eM}`;
+  // ถ้าเวลาปัจจุบันยังไม่ถึงรอบแรก ให้รอบถัดไปเป็นรอบแรกเลย
+  if (thailandTime < firstStart) {
+    // nextStart = firstStart;
+  } else {
+    // วนหา nextStart รอบที่ยังไม่เริ่มจากเวลาปัจจุบัน
+    while (nextStart.getTime() + duration <= thailandTime.getTime()) {
+      // บวก (duration + interval) เพื่อไปรอบถัดไป
+      nextStart = new Date(nextStart.getTime() + duration + interval);
     }
+  }
 
-    setInterval(updateTime, 1000);
-    updateTime();
+  const nextEnd = new Date(nextStart.getTime() + duration);
+
+  const nH = nextStart.getHours().toString().padStart(2, '0');
+  const nM = nextStart.getMinutes().toString().padStart(2, '0');
+  const eH = nextEnd.getHours().toString().padStart(2, '0');
+  const eM = nextEnd.getMinutes().toString().padStart(2, '0');
+
+  nextDungeonEl.textContent = `รอบถัดไป: ${nH}:${nM} - ${eH}:${eM}`;
+}
+
+
+setInterval(updateTime, 1000);
+updateTime();
+
   </script>
 </body>
 </html>
