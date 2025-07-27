@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>เวลารอบดันเจี้ยน</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap');
+
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      font-family: 'Kanit', sans-serif;
+      color: #a0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .container {
+      background: rgba(15, 32, 39, 0.85);
+      padding: 40px 60px;
+      border-radius: 15px;
+      box-shadow: 0 8px 30px rgba(0, 150, 150, 0.3);
+      max-width: 450px;
+      width: 100%;
+      user-select: none;
+    }
+
+    h1 {
+      font-weight: 700;
+      font-size: 2.4rem;
+      margin-bottom: 30px;
+      color: #5df4f4;
+      text-shadow: 0 0 10px #42e4e4;
+    }
+
+    .time {
+      font-size: 1.8rem;
+      margin: 20px 0;
+      padding: 15px 20px;
+      border-radius: 12px;
+      background: rgba(0, 255, 255, 0.1);
+      box-shadow: inset 0 0 10px #3bdcdc;
+      transition: background-color 0.3s ease;
+    }
+
+    /* เพิ่มบรรทัดนี้ */
+    #nextDungeon {
+    white-space: nowrap;
+    font-weight: 600;
+    color: #3affb5;
+    box-shadow: 0 0 20px #3affb5;
+    }
+    /* แอนิเมชันเบาๆ */
+    .time:hover {
+      background: rgba(0, 255, 255, 0.2);
+      box-shadow: inset 0 0 20px #3bdcdc;
+      cursor: default;
+    }
+
+    footer {
+      margin-top: 35px;
+      font-size: 0.9rem;
+      color: #66c0c0cc;
+      font-style: italic;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 30px 25px;
+      }
+      h1 {
+        font-size: 1.8rem;
+      }
+      .time {
+        font-size: 1.4rem;
+        padding: 12px 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>เวลารอบดันเจี้ยน</h1>
+    <div class="time" id="currentTime">เวลาปัจจุบัน: --:--:--</div>
+    <div class="time" id="nextDungeon">รอบถัดไป: --:-- - --:--</div>
+    <footer>อัพเดทข้อมูลแบบเรียลไทม์จากเวลาไทย (GMT+7)</footer>
+  </div>
+
+  <script>
+    const currentTimeEl = document.getElementById("currentTime");
+    const nextDungeonEl = document.getElementById("nextDungeon");
+
+    function updateTime() {
+      const now = new Date();
+
+      // เวลาประเทศไทย (UTC+7)
+      const thaiOffset = 7 * 60;
+      const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+      const thailandTime = new Date(utc + thaiOffset * 60000);
+
+      const hours = thailandTime.getHours().toString().padStart(2, '0');
+      const minutes = thailandTime.getMinutes().toString().padStart(2, '0');
+      const seconds = thailandTime.getSeconds().toString().padStart(2, '0');
+      currentTimeEl.textContent = `เวลาปัจจุบัน: ${hours}:${minutes}:${seconds}`;
+
+      // เริ่มรอบแรก 17:30
+      const firstStart = new Date(thailandTime);
+      firstStart.setHours(17, 30, 0, 0);
+
+      // รอบถัดไปเพิ่มทีละ 4 ชั่วโมง (interval = 4 ชม.)
+      const interval = 4 * 60 * 60 * 1000; // 4 ชม.
+      const duration = 30 * 60 * 1000; // 30 นาที
+
+      let nextStart = new Date(firstStart);
+
+      while (nextStart.getTime() + duration <= thailandTime.getTime()) {
+        nextStart = new Date(nextStart.getTime() + interval);
+      }
+
+      const nextEnd = new Date(nextStart.getTime() + duration);
+
+      const nH = nextStart.getHours().toString().padStart(2, '0');
+      const nM = nextStart.getMinutes().toString().padStart(2, '0');
+      const eH = nextEnd.getHours().toString().padStart(2, '0');
+      const eM = nextEnd.getMinutes().toString().padStart(2, '0');
+
+      nextDungeonEl.textContent = `รอบถัดไป: ${nH}:${nM} - ${eH}:${eM}`;
+    }
+
+    setInterval(updateTime, 1000);
+    updateTime();
+  </script>
+</body>
+</html>
