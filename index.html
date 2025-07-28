@@ -104,36 +104,25 @@ const nextDungeonEl = document.getElementById("nextDungeon");
 function updateTime() {
   const now = new Date();
 
-  // เวลาประเทศไทย (UTC+7)
-  const thaiOffset = 7 * 60;
-  const utc = now.getTime() + now.getTimezoneOffset() * 60000;
-  const thailandTime = new Date(utc + thaiOffset * 60000);
+  // ปรับเวลาไทย (UTC+7)
+  const thailandTime = new Date(now.getTime() + (7 * 60 - now.getTimezoneOffset()) * 60000);
 
+  // แสดงเวลาปัจจุบัน
   const hours = thailandTime.getHours().toString().padStart(2, '0');
   const minutes = thailandTime.getMinutes().toString().padStart(2, '0');
   const seconds = thailandTime.getSeconds().toString().padStart(2, '0');
   currentTimeEl.textContent = `เวลาปัจจุบัน: ${hours}:${minutes}:${seconds}`;
 
-  const firstStart = new Date(thailandTime);
-  firstStart.setHours(17, 30, 0, 0);
+  // รอบแรกเริ่มเวลา 17:30 ของวันที่ 1 มกราคม 2024 (หรืออะไรก็ได้)
+  const baseTime = new Date('2024-01-01T17:30:00+07:00');
 
-  const interval = 4 * 60 * 60 * 1000; // 4 ชั่วโมง
-  const duration = 30 * 60 * 1000; // 30 นาที
+  const roundInterval = 4.5 * 60 * 60 * 1000; // 4 ชม. 30 นาที
 
-  let nextStart = new Date(firstStart);
-
-  // ถ้าเวลาปัจจุบันยังไม่ถึงรอบแรก ให้รอบถัดไปเป็นรอบแรกเลย
-  if (thailandTime < firstStart) {
-    // nextStart = firstStart;
-  } else {
-    // วนหา nextStart รอบที่ยังไม่เริ่มจากเวลาปัจจุบัน
-    while (nextStart.getTime() + duration <= thailandTime.getTime()) {
-      // บวก (duration + interval) เพื่อไปรอบถัดไป
-      nextStart = new Date(nextStart.getTime() + duration + interval);
-    }
-  }
-
-  const nextEnd = new Date(nextStart.getTime() + duration);
+  // หาระยะเวลาห่างกันทั้งหมด
+  const diff = thailandTime.getTime() - baseTime.getTime();
+  const roundsPassed = Math.floor(diff / roundInterval);
+  const nextStart = new Date(baseTime.getTime() + (roundsPassed + 1) * roundInterval);
+  const nextEnd = new Date(nextStart.getTime() + 30 * 60 * 1000); // บวก 30 นาที
 
   const nH = nextStart.getHours().toString().padStart(2, '0');
   const nM = nextStart.getMinutes().toString().padStart(2, '0');
