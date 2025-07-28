@@ -90,51 +90,68 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>เวลารอบดันเจี้ยน</h1>
-    <div class="time" id="currentTime">เวลาปัจจุบัน: --:--:--</div>
-    <div class="time" id="nextDungeon">รอบถัดไป: --:-- - --:--</div>
-    <footer>อัพเดทข้อมูลแบบเรียลไทม์จากเวลาไทย (GMT+7)</footer>
+  <div class="card">
+    <h2>⏰ เวลารอบดันเจี้ยน</h2>
+    <div id="currentTime" class="time"></div>
+    <div id="nextDungeon" class="time highlight"></div>
+    <div id="dungeonStatus" class="status"></div>
+    <div id="lastDungeon" class="time" style="margin-top: 10px; font-size: 0.95em; color: #aaa;"></div>
   </div>
 
+
   <script>
-    const currentTimeEl = document.getElementById("currentTime");
+const currentTimeEl = document.getElementById("currentTime");
 const nextDungeonEl = document.getElementById("nextDungeon");
+const statusEl = document.getElementById("dungeonStatus");
+const lastRoundEl = document.getElementById("lastDungeon");
 
 function updateTime() {
-  const now = new Date();
+  const now = new Date(); // เวลาเครื่องผู้ใช้
+  const baseTime = new Date('2024-01-01T17:30:00+07:00'); // เวลาเริ่มแรก
+  const roundInterval = 4.5 * 60 * 60 * 1000; // 4.5 ชม.
+  const duration = 30 * 60 * 1000; // 30 นาที
 
-  // ปรับเวลาไทย (UTC+7)
-  const thailandTime = new Date(now.getTime() + (7 * 60 - now.getTimezoneOffset()) * 60000);
-
-  // แสดงเวลาปัจจุบัน
-  const hours = thailandTime.getHours().toString().padStart(2, '0');
-  const minutes = thailandTime.getMinutes().toString().padStart(2, '0');
-  const seconds = thailandTime.getSeconds().toString().padStart(2, '0');
-  currentTimeEl.textContent = `เวลาปัจจุบัน: ${hours}:${minutes}:${seconds}`;
-
-  // รอบแรกเริ่มเวลา 17:30 ของวันที่ 1 มกราคม 2024 (หรืออะไรก็ได้)
-  const baseTime = new Date('2024-01-01T17:30:00+07:00');
-
-  const roundInterval = 4.5 * 60 * 60 * 1000; // 4 ชม. 30 นาที
-
-  // หาระยะเวลาห่างกันทั้งหมด
-  const diff = thailandTime.getTime() - baseTime.getTime();
+  const diff = now.getTime() - baseTime.getTime();
   const roundsPassed = Math.floor(diff / roundInterval);
   const nextStart = new Date(baseTime.getTime() + (roundsPassed + 1) * roundInterval);
-  const nextEnd = new Date(nextStart.getTime() + 30 * 60 * 1000); // บวก 30 นาที
+  const nextEnd = new Date(nextStart.getTime() + duration);
+  const currentStart = new Date(baseTime.getTime() + roundsPassed * roundInterval);
+  const currentEnd = new Date(currentStart.getTime() + duration);
 
+  // แสดงเวลาปัจจุบัน
+  const h = now.getHours().toString().padStart(2, '0');
+  const m = now.getMinutes().toString().padStart(2, '0');
+  const s = now.getSeconds().toString().padStart(2, '0');
+  currentTimeEl.textContent = `เวลาปัจจุบัน: ${h}:${m}:${s}`;
+
+  // รอบถัดไป
   const nH = nextStart.getHours().toString().padStart(2, '0');
   const nM = nextStart.getMinutes().toString().padStart(2, '0');
   const eH = nextEnd.getHours().toString().padStart(2, '0');
   const eM = nextEnd.getMinutes().toString().padStart(2, '0');
-
   nextDungeonEl.textContent = `รอบถัดไป: ${nH}:${nM} - ${eH}:${eM}`;
-}
 
+  // รอบที่แล้ว
+  const lH = currentStart.getHours().toString().padStart(2, '0');
+  const lM = currentStart.getMinutes().toString().padStart(2, '0');
+  const lEH = currentEnd.getHours().toString().padStart(2, '0');
+  const lEM = currentEnd.getMinutes().toString().padStart(2, '0');
+  lastRoundEl.textContent = `รอบก่อนหน้า: ${lH}:${lM} - ${lEH}:${lEM}`;
+
+  // สถานะ: เปิดอยู่ หรือ ใกล้จะเปิด
+  if (now >= currentStart && now <= currentEnd) {
+    const remaining = Math.floor((currentEnd - now) / 60000);
+    statusEl.textContent = `✅ เปิดอยู่ (จะปิดในอีก ${remaining} นาที)`;
+  } else {
+    const until = Math.floor((nextStart - now) / 60000);
+    statusEl.textContent = `⏳ จะเปิดในอีก ${until} นาที`;
+  }
+}
 
 setInterval(updateTime, 1000);
 updateTime();
+
+
 
   </script>
 </body>
